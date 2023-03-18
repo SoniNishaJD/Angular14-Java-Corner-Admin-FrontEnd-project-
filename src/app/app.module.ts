@@ -11,7 +11,8 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { HeaderComponent } from './components/header/header.component';
 import { ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http'
+import { HttpClientModule } from '@angular/common/http';
+import { CoursesInstructorComponent } from './components/courses-instructor/courses-instructor.component'
 
 
 const appRoutes: Routes = [
@@ -19,6 +20,7 @@ const appRoutes: Routes = [
   { path: 'students', component: StudentsComponent },
   { path: 'courses', component: CoursesComponent },
   { path: 'teachers', component: TeachersComponent },
+  { path: 'instructor-courses/:id', component: CoursesInstructorComponent },
   { path: 'navbar', component: NavbarComponent },
   { path: 'header', component: HeaderComponent },
 
@@ -31,7 +33,8 @@ const appRoutes: Routes = [
     CoursesComponent,
     TeachersComponent,
     NavbarComponent,
-    HeaderComponent
+    HeaderComponent,
+    CoursesInstructorComponent
   ],
   imports: [
     BrowserModule,

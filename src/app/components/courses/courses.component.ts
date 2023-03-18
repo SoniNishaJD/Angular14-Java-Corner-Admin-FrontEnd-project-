@@ -1,7 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
-import { error } from 'jquery';
 import { Observable, catchError, throwError } from 'rxjs';
 import { Course } from 'src/app/model/course.model';
 import { Instructor } from 'src/app/model/instructor.model';
@@ -18,16 +17,19 @@ import { InstructorsService } from 'src/app/services/instructors.service';
 export class CoursesComponent implements OnInit {
 
 
-  searchFormGroup!:FormGroup
-  courseFormGroup!: FormGroup
-  pageCourses$! :Observable<PageResponse<Course>>
+  searchFormGroup!: FormGroup;
+  courseFormGroup!: FormGroup;
+  updateCourseFormGroup!: FormGroup;
+  pageCourses$!: Observable<PageResponse<Course>>;
   instructors$!: Observable<Array<Instructor>>
-  currentPage: number=0;
-  pageSize: number=5;
+  currentPage: number = 0;
+  pageSize: number = 5;
   errorMessage!: string;
   errorInstructorsMessage!: string;
   submitted: boolean = false;
-  constructor(private modalService: NgbModal, private fb: FormBuilder, private courseService : CoursesService, private instructorService: InstructorsService) {
+  defaultInstructor!: Instructor;
+
+  constructor(private modalService: NgbModal, private fb: FormBuilder, private courseService: CoursesService, private instructorService: InstructorsService) {
   }
 
   ngOnInit(): void {
@@ -87,11 +89,11 @@ this.instructors$ = this.instructorService.findAllInstructors().pipe(
   })
 )
 }
-  onCloseModel() {
+  onCloseModel(modal: any) {
     modal.close();
     this.courseFormGroup.reset();
 }
-  onSaveCourse() {
+  onSaveCourse(modal: any) {
     this.submitted = true;
     console.log(this.courseFormGroup)
     if (this.courseFormGroup.invalid) return;
@@ -109,6 +111,31 @@ this.instructors$ = this.instructorService.findAllInstructors().pipe(
    
   }
   getUpdateModel(c: Course, updateContent: any) {
-    
+    this.fatchInstructors();
+    this.updateCourseFormGroup = this.fb.group({
+      courseId: [c.courseId, Validators.required],
+      courseName: [c.courseName, Validators.required],
+      courseDuration: [c.courseDuration, Validators.required],
+      courseDescription: [c.courseDescription, Validators.required],
+      instructor: [c.instructor, Validators.required]
+    })
+    this.defaultInstructor = this.updateCourseFormGroup.controls['instructor'].value;
+    this.modalService.open(updateContent, {size: 'xl' })
+  }
+
+  onUpdateCourse(updateModel: any) {
+    this.submitted = true;
+    if (this.updateCourseFormGroup.invalid) return;
+    this.courseService.updateCourse(this.updateCourseFormGroup.value, this.updateCourseFormGroup.value.courseId).subscribe({
+      next: () => {
+        alert("success Updating Course");
+        this.handleSearchCourses();
+        this.submitted = false; 
+        updateModel.close();
+      }, error: err => {
+        alert(err.message)
+      }
+    })
+
   }
 }
