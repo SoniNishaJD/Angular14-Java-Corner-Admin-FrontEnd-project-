@@ -21,19 +21,11 @@ export class StudentsComponent implements OnInit {
 
   searchFormGroup!: FormGroup;
   studentFormGroup!: FormGroup;
-  updatestudentFormGroup!: FormGroup;
   pageStudents!: Observable<PageResponse<Student>>;
   errorMessage!: string;
-  users$!: Observable<Array<User>>
   currentPage: number = 0;
-  pageSize: number = 3;
+  pageSize: number = 5;
   submitted: boolean = false;
-  updateStudentFormGroup: any;
-
-  errorUsersMessage!: string;
-  defaultUser: any;
-  updateContent: any;
-  UserService: any;
 
 
   // constructor() { }
@@ -48,7 +40,7 @@ export class StudentsComponent implements OnInit {
       firstName: ["", Validators.required],
       lastName: ["", Validators.required],
       level: ["", Validators.required],
-      user: this.fb.group({ 
+      user: this.fb.group({
         email: ["", [Validators.required, Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$")], [EmailExistsValidator.validate(this.userService)]],
         password: ["", Validators.required],
       })
@@ -59,8 +51,7 @@ export class StudentsComponent implements OnInit {
 
 
   getModal(content: any) {
-    this.modalService.open(content, { size: 'xl' })
-    this.fatchUsers();
+    this.modalService.open(content, {size: 'xl'})
     this.submitted = false
   }
 
@@ -68,7 +59,7 @@ export class StudentsComponent implements OnInit {
   handleSearchStudents() {
     let keyword = this.searchFormGroup.value.keyword;
     console.log(this.pageStudents)
-    this.pageStudents = this.studentService.searchStudent(keyword, this.currentPage, this.pageSize).pipe(
+    this.pageStudents = this.studentService.searchStudents(keyword, this.currentPage, this.pageSize).pipe(
       catchError(err => {
         this.errorMessage = err.message;
         return throwError(err);
@@ -77,11 +68,11 @@ export class StudentsComponent implements OnInit {
 
   }
 
-  handleDeleteStudent(s: Student) {
+  handleDeleteStudent(student: Student) {
     let conf = confirm("Are you sure?");
     if (!conf) return;
-    this.studentService.deleteStudent(s.studentId).subscribe({
-      next: () => {
+    this.studentService.deleteStudent(student.studentId).subscribe({
+      next: (resp) => {
         this.handleSearchStudents()
       },
       error: err => {
@@ -113,57 +104,12 @@ export class StudentsComponent implements OnInit {
     })
 
   }
-  
 
-  onCloseModel(modal: any) {
-    modal.close();
-    this.studentFormGroup.reset();
-}
-
-  getUpdateModel(s: Student, updateContent: any) {
-    this.fatchUsers();
-    this.updateStudentFormGroup = this.fb.group({
-      studentId: [s.studentId, Validators.required],
-      firstName: [s.firstName, Validators.required],
-      lastName: [s.lastName, Validators.required],
-      level: [s.level, Validators.required],
-      email: [s.email, Validators.required],
-      password: [s.password, Validators.required],
-      user: [s.user, Validators.required],
-      instructor: [s.instructor, Validators.required]
-    })
-    this.defaultUser = this.updateStudentFormGroup.controls['user'].value;
-    this.modalService.open(updateContent, {size: 'xl' })
-  }
-
-  fatchUsers() {
-    this.users$ = this.UserService.findAllUsers().pipe(
-      catchError(err => {
-        this.errorUsersMessage = err.message;
-        return throwError(err);
-      })
-    )
-  }
   onCloseModal(modal: any) {
     modal.close();
     this.studentFormGroup.reset();
-}
-  onUpdateStudent(updateModel: any) {
-    this.submitted = true;
-    if (this.updateStudentFormGroup.invalid) return;
-    this.studentService.updateStudent(this.updateStudentFormGroup.value, this.updateStudentFormGroup.value.studentId).subscribe({
-      next: () => {
-        alert("success Updating Student");
-        this.handleSearchStudents();
-        this.submitted = false; 
-        updateModel.close();
-      }, error: err => {
-        alert(err.message)
-      }
-    })
+  }
 }
 
-
-}
 
  
